@@ -1,0 +1,39 @@
+const express = require('express');
+const app = express();
+require('dotenv').config();
+
+app.use(express.json());
+
+
+//Middleware for WAF applying the basic security rules for SQL Injections, Cross-site Scripting
+const wafMiddleware = (req, res, next) => {
+    const badPatterns = [
+        /\b(SELECT|DROP|DELETE|INSERT|UPDATE|UNION|EXEC|ALTER|CREATE|TRUNCATE|REPLACE)\b/i, // SQL Injection
+        /<script[\s\S]*?>|<iframe[\s\S]*?>|<svg[\s\S]*?>|on\w+\s*=/i, // XSS Attack
+        /<[^>]*>/, // General HTML tag filtering (optional)
+        /(\balert\b|\bprompt\b|\bconfirm\b)/i, // JavaScript popups
+        /\.\.\//i // Directory Traversal Attack
+    ];
+
+    const requestData = req.url + JSON.stringify(req.body) + JSON.stringify(req.query);
+    for (const pattern of badPatterns) {
+        if (pattern.test(requestData)) {
+            // console.log(`Blocked request: ${req.url} ${requestData.url} - ${req.method} ${req.url}`);
+            console.log(`🚨 Blocked request: ${req.method} ${req.url} from ${req.ip}`);
+            return res.status(403).send('Forbidden: Suspicous Request Detected');
+        }
+    }
+        next();
+};
+app.use(wafMiddleware); // Apply the WAF middleware to all routes- globally
+
+app.get ('/',(req,res) => {
+    res.send('Web application firewall is running');
+})
+
+
+//Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT,() => {
+    console.log(`Server is running on port ${PORT}`);
+})
