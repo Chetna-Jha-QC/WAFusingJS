@@ -66,5 +66,36 @@ npm start
 | POST | `/api/rules` | Add new firewall rule |
 | DELETE | `/api/rules/:id` | Remove a firewall rule |
 
+## Diagram layout
+```
+                           +------------------------+
+                           |    Web Application     |
+                           |  (Protected Resource)  |
+                           +------------------------+
+                                     ▲
+                                     |
+                                     | (Allowed Traffic)
+                                     |
+                           +------------------------+
+                           |  Web Application Firewall (WAF) |
+                           +------------------------+
+                                     ▲
+                   +----------------+----------------+
+                   |                |                |
+        +----------------+  +----------------+  +----------------+
+        | Input Filtering |  | Request Analysis |  | IP & Rate Limiting |
+        |  (SQLi, XSS)    |  |  (Logging &     |  | (DDoS Protection)   |
+        | Prevention      |  |  Blocking)      |  |                    |
+        +----------------+  +----------------+  +----------------+
+                   |                |                |
+                   +----------------+----------------+
+                                     ▲
+                                     |
+                            +--------------------+
+                            | Incoming Requests  |
+                            |  (Users, Bots, etc.) |
+                            +--------------------+
+```
+
 ## License
 This project is licensed under the MIT License.
