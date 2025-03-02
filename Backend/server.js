@@ -37,6 +37,11 @@ const wafMiddleware = (req, res, next) => {
     next();
 };
 
+// RATE LIMIT
+const rateLimit = rateLimit({
+    windowsMs: process.env.RATE_LIMIT_MAX || 60 * 1000, // 1min
+    max
+})
 // Apply WAF globally BEFORE defining routes
 app.use(wafMiddleware);
 
